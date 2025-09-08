@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile Form</title>
+  <style>
+    body {
+      background-color: #0a2a33;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .form-container {
+      background-color: #08222b;
+      padding: 20px;
+      border-radius: 10px;
+      width: 350px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: none;
+      background-color: #103540;
+      color: white;
+    }
+    input:focus, select:focus {
+      outline: none;
+      background-color: #154954;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <form>
+      <label>First Name</label>
+      <input type="text" value="John">
+
+      <label>Username</label>
+      <input type="text" value="john_doe">
+
+      <label>Gender</label>
+      <select>
+        <option value="male" selected>Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label>Date of Birth</label>
+      <input type="date" value="1995-07-15">
+
+      <label>Email Address</label>
+      <input type="email" value="john@example.com">
+
+      <label>Phone</label>
+      <input type="tel" value="+1234567890">
+
+      <label>Country</label>
+      <input type="text" value="Nigeria">
+    </form>
+  </div>
+</body>
+</html>
