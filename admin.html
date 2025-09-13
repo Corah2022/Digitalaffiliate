@@ -421,7 +421,7 @@ document.getElementById("fundForm").addEventListener("submit", async (e) => {
 
   // record transaction
   const txRef = push(ref(db, "users/" + currentUserId + "/transactions"));
-  await set(txRef, { id: txRef.key, type: "admin_fund", amount: amt, wallet, createdAt: Date.now() });
+  await set(txRef, { id: txRef.key, type: "Deposit", amount: amt, wallet, createdAt: Date.now() });
 
   alert("Funded successfully");
   loadUserData();
