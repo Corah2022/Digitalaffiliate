@@ -95,7 +95,7 @@
 <!--Full Layout-->
 <div class="panel-layout">
     <!--Header-->
- <div class="panel-header">
+    <div class="panel-header">
         <div class="logo">
             <a href="#">
                 <img class="logo-unfold" src="Digitalaffiliate_logo.png" alt="Logo"/>
@@ -124,14 +124,21 @@
                     <div class="single-nav-right user-notifications64">
                         <button type="button" class="item notification-dot" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-bell"></i>
-                      
+                            <div class="number">0</div>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end notification-pop">
-                            <div class="noti-head">Notifications</div>
-                            <div class="all-noti" data-id="notificationHistory">
+                            <div class="noti-head">Notifications <span>0</span></div>
+                            <div class="all-noti">
                                 <p>Notification Not Found</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="single-right">
+                        <select name="language" class="site-nice-select" onchange="window.location.href=this.options[this.selectedIndex].value;">
+                            <option value="#" selected>English</option>
+                            <option value="#">Spanish</option>
+                            <option value="#">French</option>
+                        </select>
                     </div>
                     <div class="single-right">
                         <button type="button" class="item" data-bs-toggle="dropdown" aria-expanded="false">
@@ -143,16 +150,21 @@
                                     <i class="fa-solid fa-gear"></i>Settings
                                 </a>
                             </li>
-                            
-                            
-                           <li class="logout">
-  <form method="POST" action="index.html" id="logout-form">
-    <input type="hidden" name="_token" value="9kCuipxO2Fv0Jp7SzFlGyrKtgTFJ9QLPihfrgMeQ">
-    <button id="logoutBtn" type="submit" class="dropdown-item" onclick="event.preventDefault(); localStorage.clear(); document.getElementById('logout-form').submit();">
-      <i class="fa-solid fa-sign-out-alt"></i> Logout
-    </button>
-  </form>
-</li>
+                            <li>
+                                <a href="https://topaffiliatepath.online/account/user/change-password" class="dropdown-item" type="button">
+                                    <i class="fa-solid fa-lock"></i>Change Password
+                                </a>
+                            </li>
+                            <li>
+                          
+                             <li class="logout">
+                                <form method="POST" action="index.html" id="logout-form">
+                                    <input type="hidden" name="_token" value="9kCuipxO2Fv0Jp7SzFlGyrKtgTFJ9QLPihfrgMeQ">
+                                    <a href="index.html" class="dropdown-item" onclick="event.preventDefault(); localStorage.clear(); $('#logout-form').submit();">
+                                        <i class="fa-solid fa-sign-out-alt"></i>Logout
+                                    </a>
+                                </form>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -211,6 +223,15 @@
                     <li class="side-nav-item">
                         <a href="settings.html"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
                     </li>
+                  
+                    <li class="side-nav-item">
+                        <form method="POST" action="index.html">
+                            <input type="hidden" name="_token" value="9kCuipxO2Fv0Jp7SzFlGyrKtgTFJ9QLPihfrgMeQ">
+                            <button type="submit" class="site-btn grad-btn w-100">
+                                <i class="fa-solid fa-sign-out-alt"></i><span>Logout</span>
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -243,42 +264,28 @@
                         </div>
                     </div>
                     <!--Page Content-->
-                                    <div class="row justify-content-center">
+          <div class="row justify-content-center">
         <div class="col-xl-10 col-lg-12 col-md-12">
             <div class="site-card">
                 <div class="site-card-header">
                     <h3 class="title">Review and Confirm Investment</h3>
                 </div>
                 <div class="site-card-body">
-                    
-                        <input type="hidden" name="_token" value="MMzJWEMG7odDaVWdj6HBREtKqnrihKV7q5IeJKvo">                        
-                        <div class="progress-steps-form">
+                    <form id="investForm">                   <div class="progress-steps-form">
                             <div class="transaction-list table-responsive">
-                                <form id="investForm">
-                                    <table class="table preview-table">
+                                <table class="table preview-table">
                                     <tbody>
-
-                                        <tr>
-                                        <td><strong>Select Plan</strong></td>
+                                    <tr>
+                                        <td><strong>Select Schema:</strong></td>
                                         <td>
                                             <div class="input-group mb-0">
-                                                 <select id="plan" class="form-control" >
-          <option value="basic">Basic ($500–$6500)</option>
-        </select>
+                                                <select class="site-nice-select" aria-label="Default select example"
+                                                        id="plan" required>
+<option value="premium">Premium Plan</option>
+                                                                                                    </select>
                                             </div>
                                         </td>
-                                        </tr>
-                                        
-        <tr>
-                                        <td><strong>Enter Amount:</strong></td>
-                                        <td>
-                                            <div class="input-group mb-0">
-                                                <input type="number" id="amount" placeholder="Amount ($)" class="form-control" required>
-                                                <span class="input-group-text" id="basic-addon1">USD</span>
-                                            </div>
-                                        </td>
-                                        </tr>
-                                        
+                                    </tr>
 
                                     <tr>
                                         <td><strong>Profit Holiday:</strong></td>
@@ -287,15 +294,40 @@
                                     </tr>
 
                                     <tr>
+                                        <td><strong>Amount:</strong></td>
+                                        <td id="amount">
+                                            Minimum 3000 USD - Maximum 42900 USD
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><strong>Enter Amount:</strong></td>
+                                        <td>
+                                            <div class="input-group mb-0">
+                                                <input type="text" class="form-control"
+                                                        placeholder="Enter Amount"
+                                                       id="amount" aria-label="Amount" id="enter-amount"
+                                                       aria-describedby="basic-addon1" required>
+                                                <span class="input-group-text" id="basic-addon1">USD</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
                                         <td><strong>Select Wallet:</strong></td>
-                                       
-                                        <td id="return-interest">
-                                        <select name="" id="">
-                                         <option
-                                                        value="main">Main Wallet ( $<span data-id="mainBalance">0.00</span>)
+                                        <td>
+                                            <div class="input-group mb-0">
+                                                <select class="site-nice-select" aria-label="Default select example"
+                                                        name="wallet" required id="selectWallet">
+                                                    <option
+                                                        value="main">Main Wallet ( $<span data-id="mainBalance">0.00</span>
+                                                        )
                                                     </option>
-                                       </select>
-                                    </td>
+                                                    
+                                                </select>
+                                            </div>
+
+                                        </td>
                                     </tr>
 
                                     <tr class="gatewaySelect">
@@ -310,11 +342,11 @@
 
                                     <tr>
                                         <td><strong>Return of Interest:</strong></td>
-                                        <td id="return-interest">25% (Daily) </td>
+                                        <td id="return-interest">100% (Weekly)</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Number of Period:</strong></td>
-                                        <td id="number-period">7 Times </td>
+                                        <td id="number-period">6 Times </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Capital Back:</strong></td>
@@ -323,7 +355,7 @@
                                     <tr>
                                         <td><strong>Total Investment Amount:</strong></td>
                                         <td><span
-                                                id="total-amount"> $<span data-id="totalInvestment">0.00</span></span> USD
+                                                data-id="totalInvestment"> 0</span> USD
                                         </td>
                                     </tr>
                                     </tbody>
@@ -341,7 +373,6 @@
                     </form>
 
                 </div>
-
             </div>
         </div>
     </div>
@@ -364,7 +395,7 @@
     <a href="shemas.html" class="active">
         <i icon-name="box"></i>
     </a>
-  
+    
     <a href="settings.html" class="">
         <i icon-name="settings"></i>
     </a>
@@ -378,8 +409,7 @@
     <!-- /Automatic Popup End -->
 </div>
 <!--/Full Layout-->
-
-  <!-- Load scripts after DOM -->
+      <!-- Load scripts after DOM -->
   <script type="module">
     // dashboard.js (defensive + DOM-ready)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
@@ -729,6 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
   </script>
+
 <script src="https://topaffiliatepath.online/account/assets/global/js/jquery.min.js"></script>
 <script src="https://topaffiliatepath.online/account/assets/global/js/jquery-migrate.js"></script>
 <script src="https://topaffiliatepath.online/account/assets/frontend/js/bootstrap.bundle.min.js"></script>
