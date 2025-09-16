@@ -699,18 +699,20 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="site-badge primary-bg">${t.type || 'Transaction'}</div>
   </td>
 
-  <td><strong>$${Number(t.amount||0).toFixed(2)}</strong></td>
+  <td><strong>$${Number(t.amount || 0).toFixed(2)}</strong></td>
 
-  <td><strong>$${Number(t.fee||0).toFixed(2)}</strong></td>
+  <td><strong>$${Number(t.fee || 0).toFixed(2)}</strong></td>
 
+  <!-- ✅ Withdrawal/Transaction Status -->
   <td>
-    <div class="site-badge ${t.status?.toLowerCase() || ''}">
-      ${t.status || ''}
+    <div class="site-badge ${t.status?.toLowerCase() || 'default'}">
+      ${t.status || 'Unknown'}
     </div>
   </td>
 
   <td><strong>${t.source || 'System'}</strong></td>
-</tr>`;
+</tr>
+`;
             }).join('');
           } else {
             txDiv.innerHTML = '<div class="small">No transactions yet</div>';
@@ -1128,6 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </head>
 </body>
 </html>
+
 
 
 
