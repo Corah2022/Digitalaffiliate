@@ -708,16 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Invest form not found, skipping attachment');
     }
 
-      // Withdraw handler with KYC check
-        document.getElementById('withdrawForm')?.addEventListener('submit', async e=>{
-          e.preventDefault();
-          const snap=await get(userRef);
-          const userData=snap.val()||{};
-          if(userData.kycStatus!=='approved'){
-            alert('Please do your KYC first.');
-            return;
-          }
-
     // Withdraw form handler
     const withdrawForm = document.getElementById('withdrawForm');
     if (withdrawForm) {
@@ -871,6 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </strong><a id="scrollUp" href="file:///C:/Users/DELL/Documents/Digitalaffiliate-main/Digitalaffiliate-main/withdraw.html#top" style="display: none; position: fixed; z-index: 2147483647;"><i class="fa-solid fa-caret-up"></i></a></body></html>
+
 
 
 
