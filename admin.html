@@ -220,6 +220,12 @@
         </form>
       </div>
 
+            <div class="card">
+        <h2>KYC Management</h2>
+        <p>Status: <span id="kycStatus">Not submitted</span></p>
+        <button id="approveKYC">Approve</button>
+        <button id="rejectKYC">Reject</button>
+      </div>
 
       <div class="card">
         <h2>Send Notification</h2>
@@ -259,243 +265,267 @@
     </div>
   </div>
 
- 
-
-  <script type="module">
+ <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyDkfxpBDGypau8uh6Qq95acUl57nxlppaM",
-  authDomain: "digital-affiliate-c04af.firebaseapp.com",
-  databaseURL: "https://digital-affiliate-c04af-default-rtdb.firebaseio.com",
-  projectId: "digital-affiliate-c04af",
-  storageBucket: "digital-affiliate-c04af.firebasestorage.app",
-  messagingSenderId: "242061474584",
-  appId: "1:242061474584:web:8fa4829a52e043473e7c6d"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyDkfxpBDGypau8uh6Qq95acUl57nxlppaM",
+    authDomain: "digital-affiliate-c04af.firebaseapp.com",
+    databaseURL: "https://digital-affiliate-c04af-default-rtdb.firebaseio.com",
+    projectId: "digital-affiliate-c04af",
+    storageBucket: "digital-affiliate-c04af.firebasestorage.app",
+    messagingSenderId: "242061474584",
+    appId: "1:242061474584:web:8fa4829a52e043473e7c6d"
+  };
 
-let currentUserId = null;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-/* ---------------- ADMIN LOGIN ---------------- */
-document.getElementById("loginBtn").addEventListener("click", () => {
-  const pass = document.getElementById("adminPass").value;
-  if (pass === "1234") {
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("adminWrap").style.display = "block";
-  } else {
-    document.getElementById("loginError").style.display = "block";
-  }
-});
+  let currentUserId = null;
 
-/* ---------------- LOAD USERS ---------------- */
-async function loadUsers() {
-  const snap = await get(ref(db, "users"));
-  const select = document.getElementById("userSelect");
-  select.innerHTML = "";
-  if (snap.exists()) {
-    const users = snap.val();
-    for (const uid in users) {
-      const opt = document.createElement("option");
-      opt.value = uid;
-      opt.textContent = users[uid].profile?.name || users[uid].profile?.email || uid;
-      select.appendChild(opt);
+  /* ---------------- ADMIN LOGIN ---------------- */
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === "1234") {
+      document.getElementById("loginModal").style.display = "none";
+      document.getElementById("adminWrap").style.display = "block";
+    } else {
+      document.getElementById("loginError").style.display = "block";
     }
-    if (select.options.length) {
-      currentUserId = select.value;
+  });
+
+  /* ---------------- LOAD USERS ---------------- */
+  async function loadUsers() {
+    const snap = await get(ref(db, "users"));
+    const select = document.getElementById("userSelect");
+    select.innerHTML = "";
+    if (snap.exists()) {
+      const users = snap.val();
+      for (const uid in users) {
+        const opt = document.createElement("option");
+        opt.value = uid;
+        opt.textContent = users[uid].profile?.name || users[uid].profile?.email || uid;
+        select.appendChild(opt);
+      }
+      if (select.options.length) {
+        currentUserId = select.value;
+        loadUserData();
+      }
+    }
+  }
+
+  document.getElementById("userSelect").addEventListener("change", (e) => {
+    currentUserId = e.target.value;
+    loadUserData();
+  });
+
+  /* ---------------- LOAD USER DATA ---------------- */
+  async function loadUserData() {
+    if (!currentUserId) return;
+    const snap = await get(ref(db, "users/" + currentUserId));
+    if (!snap.exists()) return;
+    const data = snap.val();
+
+    // Fill form
+    const p = data.profile || {};
+    document.getElementById("name").value = p.name || "";
+    document.getElementById("email").value = p.email || "";
+    document.getElementById("phone").value = p.phone || "";
+    document.getElementById("gender").value = p.gender || "";
+    document.getElementById("country").value = p.country || "";
+    document.getElementById("dob").value = p.dob || "";
+    document.getElementById("address").value = p.address || "";
+    document.getElementById("mainWallet").value = data.wallets?.mainWallet || 0;
+    document.getElementById("profitWallet").value = data.wallets?.profitWallet || 0;
+
+    // Transactions
+    const txTable = document.querySelector("#txTable tbody");
+    txTable.innerHTML = "";
+    if (data.transactions) {
+      Object.entries(data.transactions).forEach(([id, t]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${id}</td>
+          <td contenteditable="true" data-edit-tx-type="${id}">${t.type}</td>
+          <td contenteditable="true" data-edit-tx-amt="${id}">${t.amount}</td>
+          <td>
+            <button data-save-tx="${id}">Save</button>
+            <button data-del-tx="${id}">Delete</button>
+          </td>`;
+        txTable.appendChild(tr);
+      });
+    }
+
+    // Investments
+    const invTable = document.querySelector("#invTable tbody");
+    invTable.innerHTML = "";
+    if (data.investments) {
+      Object.entries(data.investments).forEach(([id, inv]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${id}</td>
+          <td contenteditable="true" data-edit-inv-plan="${id}">${inv.plan}</td>
+          <td contenteditable="true" data-edit-inv-amt="${id}">${inv.amount}</td>
+          <td contenteditable="true" data-edit-inv-status="${id}">${inv.finished ? "Finished" : "Active"}</td>
+          <td>
+            <button data-save-inv="${id}">Save</button>
+            <button data-del-inv="${id}">Delete</button>
+          </td>`;
+        invTable.appendChild(tr);
+      });
+    }
+
+    // Notifications
+    const noteTable = document.querySelector("#noteTable tbody");
+    noteTable.innerHTML = "";
+    if (data.notifications) {
+      Object.entries(data.notifications).forEach(([id, n]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${id}</td>
+          <td contenteditable="true" data-edit-note-title="${id}">${n.title}</td>
+          <td contenteditable="true" data-edit-note-body="${id}">${n.body}</td>
+          <td>
+            <button data-save-note="${id}">Save</button>
+            <button data-del-note="${id}">Delete</button>
+          </td>`;
+        noteTable.appendChild(tr);
+      });
+    }
+  }
+
+  /* ---------------- UPDATE PROFILE ---------------- */
+  document.getElementById("userForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUserId) return;
+    const updates = {
+      profile: {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        gender: document.getElementById("gender").value,
+        country: document.getElementById("country").value,
+        dob: document.getElementById("dob").value,
+        address: document.getElementById("address").value,
+      },
+      wallets: {
+        mainWallet: Number(document.getElementById("mainWallet").value),
+        profitWallet: Number(document.getElementById("profitWallet").value),
+      }
+    };
+    await update(ref(db, "users/" + currentUserId), updates);
+    alert("User updated");
+  });
+
+  /* ---------------- FUND WALLET ---------------- */
+  document.getElementById("fundForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUserId) return;
+    const wallet = document.getElementById("fundWallet").value;
+    const amt = Number(document.getElementById("fundAmount").value);
+
+    // update wallet
+    const snap = await get(ref(db, "users/" + currentUserId + "/wallets/" + wallet));
+    const bal = snap.exists() ? snap.val() : 0;
+    await update(ref(db, "users/" + currentUserId + "/wallets"), { [wallet]: bal + amt });
+
+    // update totalDeposit
+    const userRef = ref(db, "users/" + currentUserId);
+    const userSnap = await get(userRef);
+    const userData = userSnap.val() || {};
+    const totalDeposit = (userData.totalDeposit || 0) + amt;
+    await update(userRef, { totalDeposit });
+
+    // record transaction
+    const txRef = push(ref(db, "users/" + currentUserId + "/transactions"));
+    await set(txRef, { id: txRef.key, type: "Deposit", amount: amt, wallet, createdAt: Date.now() });
+
+    alert("Funded successfully");
+    loadUserData();
+  });
+
+  /* ---------------- KYC APPROVAL ---------------- */
+  document.getElementById("approveKYC").addEventListener("click", async () => {
+    if (!currentUserId) return;
+    await update(ref(db, "users/" + currentUserId), { kycStatus: "approved" });
+    alert("KYC Approved");
+    loadUserData();
+  });
+
+  document.getElementById("rejectKYC").addEventListener("click", async () => {
+    if (!currentUserId) return;
+    await update(ref(db, "users/" + currentUserId), { kycStatus: "rejected" });
+    alert("KYC Rejected");
+    loadUserData();
+  });
+
+  /* ---------------- SEND NOTIFICATION ---------------- */
+  document.getElementById("notifyForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUserId) return;
+    const title = document.getElementById("notifyTitle").value;
+    const body = document.getElementById("notifyBody").value;
+    const nRef = push(ref(db, "users/" + currentUserId + "/notifications"));
+    await set(nRef, { id: nRef.key, title, body, createdAt: Date.now(), read: false });
+    alert("Notification sent");
+    loadUserData();
+  });
+
+  /* ---------------- DELETE + EDIT ---------------- */
+  document.body.addEventListener("click", async (e) => {
+    // Delete
+    if (e.target.dataset.delTx) {
+      await remove(ref(db, `users/${currentUserId}/transactions/${e.target.dataset.delTx}`));
       loadUserData();
     }
-  }
-}
-document.getElementById("userSelect").addEventListener("change", (e) => {
-  currentUserId = e.target.value;
-  loadUserData();
-});
-
-/* ---------------- LOAD USER DATA ---------------- */
-async function loadUserData() {
-  if (!currentUserId) return;
-  const snap = await get(ref(db, "users/" + currentUserId));
-  if (!snap.exists()) return;
-  const data = snap.val();
-
-  // Fill form
-  const p = data.profile || {};
-  document.getElementById("name").value = p.name || "";
-  document.getElementById("email").value = p.email || "";
-  document.getElementById("phone").value = p.phone || "";
-  document.getElementById("gender").value = p.gender || "";
-  document.getElementById("country").value = p.country || "";
-  document.getElementById("dob").value = p.dob || "";
-  document.getElementById("address").value = p.address || "";
-  document.getElementById("mainWallet").value = data.wallets?.mainWallet || 0;
-  document.getElementById("profitWallet").value = data.wallets?.profitWallet || 0;
-
-  // Transactions
-  const txTable = document.querySelector("#txTable tbody");
-  txTable.innerHTML = "";
-  if (data.transactions) {
-    Object.entries(data.transactions).forEach(([id, t]) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td contenteditable="true" data-edit-tx-type="${id}">${t.type}</td>
-        <td contenteditable="true" data-edit-tx-amt="${id}">${t.amount}</td>
-        <td>
-          <button data-save-tx="${id}">Save</button>
-          <button data-del-tx="${id}">Delete</button>
-        </td>`;
-      txTable.appendChild(tr);
-    });
-  }
-
-  // Investments
-  const invTable = document.querySelector("#invTable tbody");
-  invTable.innerHTML = "";
-  if (data.investments) {
-    Object.entries(data.investments).forEach(([id, inv]) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td contenteditable="true" data-edit-inv-plan="${id}">${inv.plan}</td>
-        <td contenteditable="true" data-edit-inv-amt="${id}">${inv.amount}</td>
-        <td contenteditable="true" data-edit-inv-status="${id}">${inv.finished ? "Finished" : "Active"}</td>
-        <td>
-          <button data-save-inv="${id}">Save</button>
-          <button data-del-inv="${id}">Delete</button>
-        </td>`;
-      invTable.appendChild(tr);
-    });
-  }
-
-  // Notifications
-  const noteTable = document.querySelector("#noteTable tbody");
-  noteTable.innerHTML = "";
-  if (data.notifications) {
-    Object.entries(data.notifications).forEach(([id, n]) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td contenteditable="true" data-edit-note-title="${id}">${n.title}</td>
-        <td contenteditable="true" data-edit-note-body="${id}">${n.body}</td>
-        <td>
-          <button data-save-note="${id}">Save</button>
-          <button data-del-note="${id}">Delete</button>
-        </td>`;
-      noteTable.appendChild(tr);
-    });
-  }
-}
-
-         
-/* ---------------- UPDATE PROFILE ---------------- */
-document.getElementById("userForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!currentUserId) return;
-  const updates = {
-    profile: {
-      name: document.getElementById("name").value,
-      email: document.getElementById("email").value,
-      phone: document.getElementById("phone").value,
-      gender: document.getElementById("gender").value,
-      country: document.getElementById("country").value,
-      dob: document.getElementById("dob").value,
-      address: document.getElementById("address").value,
-    },
-    wallets: {
-      mainWallet: Number(document.getElementById("mainWallet").value),
-      profitWallet: Number(document.getElementById("profitWallet").value),
+    if (e.target.dataset.delInv) {
+      await remove(ref(db, `users/${currentUserId}/investments/${e.target.dataset.delInv}`));
+      loadUserData();
     }
-  };
-  await update(ref(db, "users/" + currentUserId), updates);
-  alert("User updated");
-});
+    if (e.target.dataset.delNote) {
+      await remove(ref(db, `users/${currentUserId}/notifications/${e.target.dataset.delNote}`));
+      loadUserData();
+    }
 
-/* ---------------- FUND WALLET ---------------- */
-document.getElementById("fundForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!currentUserId) return;
-  const wallet = document.getElementById("fundWallet").value;
-  const amt = Number(document.getElementById("fundAmount").value);
-  const snap = await get(ref(db, "users/" + currentUserId + "/wallets/" + wallet));
-  const bal = snap.exists() ? snap.val() : 0;
-  await update(ref(db, "users/" + currentUserId + "/wallets"), { [wallet]: bal + amt });
+    // Save edits
+    if (e.target.dataset.saveTx) {
+      const id = e.target.dataset.saveTx;
+      const type = document.querySelector(`[data-edit-tx-type="${id}"]`).innerText;
+      const amt = Number(document.querySelector(`[data-edit-tx-amt="${id}"]`).innerText);
+      await update(ref(db, `users/${currentUserId}/transactions/${id}`), { type, amount: amt });
+      alert("Transaction updated");
+    }
+    if (e.target.dataset.saveInv) {
+      const id = e.target.dataset.saveInv;
+      const plan = document.querySelector(`[data-edit-inv-plan="${id}"]`).innerText;
+      const amt = Number(document.querySelector(`[data-edit-inv-amt="${id}"]`).innerText);
+      const statusText = document.querySelector(`[data-edit-inv-status="${id}"]`).innerText;
+      const finished = statusText.toLowerCase().includes("finish");
+      await update(ref(db, `users/${currentUserId}/investments/${id}`), { plan, amount: amt, finished });
+      alert("Investment updated");
+    }
+    if (e.target.dataset.saveNote) {
+      const id = e.target.dataset.saveNote;
+      const title = document.querySelector(`[data-edit-note-title="${id}"]`).innerText;
+      const body = document.querySelector(`[data-edit-note-body="${id}"]`).innerText;
+      await update(ref(db, `users/${currentUserId}/notifications/${id}`), { title, body });
+      alert("Notification updated");
+    }
+  });
 
-  // record transaction
-  const txRef = push(ref(db, "users/" + currentUserId + "/transactions"));
-  await set(txRef, { id: txRef.key, type: "Deposit", amount: amt, wallet, createdAt: Date.now() });
+  /* ---------------- AUTH CHECK ---------------- */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      alert("Not logged in");
+      window.location.href = "login.html";
+    } else {
+      loadUsers();
+    }
+  });
+</script>
 
-  alert("Funded successfully");
-  loadUserData();
-});
-
-/* ---------------- SEND NOTIFICATION ---------------- */
-document.getElementById("notifyForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!currentUserId) return;
-  const title = document.getElementById("notifyTitle").value;
-  const body = document.getElementById("notifyBody").value;
-  const nRef = push(ref(db, "users/" + currentUserId + "/notifications"));
-  await set(nRef, { id: nRef.key, title, body, createdAt: Date.now(), read: false });
-  alert("Notification sent");
-  loadUserData();
-});
-
-/* ---------------- DELETE + EDIT ---------------- */
-document.body.addEventListener("click", async (e) => {
-  // Delete
-  if (e.target.dataset.delTx) {
-    await remove(ref(db, `users/${currentUserId}/transactions/${e.target.dataset.delTx}`));
-    loadUserData();
-  }
-  if (e.target.dataset.delInv) {
-    await remove(ref(db, `users/${currentUserId}/investments/${e.target.dataset.delInv}`));
-    loadUserData();
-  }
-  if (e.target.dataset.delNote) {
-    await remove(ref(db, `users/${currentUserId}/notifications/${e.target.dataset.delNote}`));
-    loadUserData();
-  }
-
-  // Save edits
-  if (e.target.dataset.saveTx) {
-    const id = e.target.dataset.saveTx;
-    const type = document.querySelector(`[data-edit-tx-type="${id}"]`).innerText;
-    const amt = Number(document.querySelector(`[data-edit-tx-amt="${id}"]`).innerText);
-    await update(ref(db, `users/${currentUserId}/transactions/${id}`), { type, amount: amt });
-    alert("Transaction updated");
-  }
-  if (e.target.dataset.saveInv) {
-    const id = e.target.dataset.saveInv;
-    const plan = document.querySelector(`[data-edit-inv-plan="${id}"]`).innerText;
-    const amt = Number(document.querySelector(`[data-edit-inv-amt="${id}"]`).innerText);
-    const statusText = document.querySelector(`[data-edit-inv-status="${id}"]`).innerText;
-    const finished = statusText.toLowerCase().includes("finish");
-    await update(ref(db, `users/${currentUserId}/investments/${id}`), { plan, amount: amt, finished });
-    alert("Investment updated");
-  }
-  if (e.target.dataset.saveNote) {
-    const id = e.target.dataset.saveNote;
-    const title = document.querySelector(`[data-edit-note-title="${id}"]`).innerText;
-    const body = document.querySelector(`[data-edit-note-body="${id}"]`).innerText;
-    await update(ref(db, `users/${currentUserId}/notifications/${id}`), { title, body });
-    alert("Notification updated");
-  }
-});
-
-/* ---------------- AUTH CHECK ---------------- */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    alert("Not logged in");
-    window.location.href = "login.html";
-  } else {
-    loadUsers();
-  }
-});
-  </script>
 </body>
 </html>
