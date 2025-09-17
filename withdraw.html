@@ -624,6 +624,16 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
+          // show KYC status
+          updateUI('kycStatus', data.kycStatus||'not_submitted');
+
+          // notify if KYC approved
+          if(data.kycStatus === 'approved' && !data.kycApprovedNotified){
+            const nRef = push(ref(db, `users/${user.uid}/notifications`));
+            set(nRef, { id:nRef.key, title:'KYC Approved', body:'Your KYC has been approved.', createdAt: Date.now() });
+            update(ref(db), { [`users/${user.uid}/kycApprovedNotified`]: true });
+          }
+
         // Notifications
         const notDiv = safeQuery('[data-id="notificationHistory"]');
         if (notDiv) {
@@ -697,6 +707,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       console.warn('Invest form not found, skipping attachment');
     }
+
+      // Withdraw handler with KYC check
+        document.getElementById('withdrawForm')?.addEventListener('submit', async e=>{
+          e.preventDefault();
+          const snap=await get(userRef);
+          const userData=snap.val()||{};
+          if(userData.kycStatus!=='approved'){
+            alert('Please do your KYC first.');
+            return;
+          }
 
     // Withdraw form handler
     const withdrawForm = document.getElementById('withdrawForm');
@@ -851,6 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </strong><a id="scrollUp" href="file:///C:/Users/DELL/Documents/Digitalaffiliate-main/Digitalaffiliate-main/withdraw.html#top" style="display: none; position: fixed; z-index: 2147483647;"><i class="fa-solid fa-caret-up"></i></a></body></html>
+
 
 
 
