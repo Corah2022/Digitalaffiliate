@@ -221,6 +221,13 @@
       </div>
 
       <div class="card">
+        <h2>KYC Management</h2>
+        <p>Status: <span id="kycStatus">Not submitted</span></p>
+        <button id="approveKYC">Approve</button>
+        <button id="rejectKYC">Reject</button>
+      </div>
+
+      <div class="card">
         <h2>Send Notification</h2>
         <form id="notifyForm">
           <label>Title: <input type="text" id="notifyTitle" required></label>
@@ -348,6 +355,13 @@ async function loadUserData() {
     });
   }
 
+      // Add to totalDeposit
+    const userRef = ref(db, "users/" + currentUserId);
+    const userSnap = await get(userRef);
+    const userData = userSnap.val() || {};
+    const totalDeposit = (userData.totalDeposit || 0) + amt;
+    await update(userRef, { totalDeposit });
+
   // Investments
   const invTable = document.querySelector("#invTable tbody");
   invTable.innerHTML = "";
@@ -385,6 +399,18 @@ async function loadUserData() {
     });
   }
 }
+
+      // Approve / Reject KYC
+  document.getElementById("approveKYC").addEventListener("click", async () => {
+    await update(ref(db, "users/" + currentUserId), { kycStatus: "approved" });
+    alert("KYC Approved");
+    loadUserData();
+  });
+  document.getElementById("rejectKYC").addEventListener("click", async () => {
+    await update(ref(db, "users/" + currentUserId), { kycStatus: "rejected" });
+    alert("KYC Rejected");
+    loadUserData();
+  });
 
 /* ---------------- UPDATE PROFILE ---------------- */
 document.getElementById("userForm").addEventListener("submit", async (e) => {
