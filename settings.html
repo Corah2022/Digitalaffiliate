@@ -601,6 +601,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
   </script>
 
+    </script>
+  <script type="module">
+    import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+
+const auth = getAuth();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        alert('You have been logged out.');
+        window.location.href = 'login.html'; // redirect to login page
+      } catch (err) {
+        console.error('Logout failed:', err);
+        alert('Error logging out: ' + err.message);
+      }
+    });
+  }
+});
+  </script>
+
 <script src="./Digitalaffiliate - Settings_files/jquery.min.js.download"></script>
 <script src="./Digitalaffiliate - Settings_files/jquery-migrate.js.download"></script>
 <script src="./Digitalaffiliate - Settings_files/bootstrap.bundle.min.js.download"></script>
@@ -687,8 +710,10 @@ document.addEventListener('DOMContentLoaded', () => {
         $.get(url)
     });
 </script>
+    
 
 </body></html>
+
 
 
 
