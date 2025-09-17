@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,7 +88,24 @@
         </form>
       </div>
 
-      
+      <div class="card">
+        <h2>Send Notification</h2>
+        <form id="notifyForm">
+          <label>Title: <input type="text" id="notifyTitle" required></label>
+          <label>Message: <textarea id="notifyBody"></textarea></label>
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Transactions</h2>
+      <table id="txTable">
+        <thead><tr><th>ID</th><th>Type</th><th>Amount</th><th>Action</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
