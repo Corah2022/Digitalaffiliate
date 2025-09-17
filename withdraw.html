@@ -713,6 +713,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (withdrawForm) {
       withdrawForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+                  // ✅ KYC check
+        if (userData.kycStatus !== 'approved') {
+          alert('Please do your KYC first.');
+          return;
+        }
+
         try {
           const amt = Number(document.getElementById('withdrawAmount')?.value || 0);
           if (!amt || amt <= 0) return alert('Enter valid amount');
@@ -861,6 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </strong><a id="scrollUp" href="file:///C:/Users/DELL/Documents/Digitalaffiliate-main/Digitalaffiliate-main/withdraw.html#top" style="display: none; position: fixed; z-index: 2147483647;"><i class="fa-solid fa-caret-up"></i></a></body></html>
+
 
 
 
