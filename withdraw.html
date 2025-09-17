@@ -709,51 +709,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Withdraw form handler
-    const withdrawForm = document.getElementById('withdrawForm');
-    if (withdrawForm) {
-      withdrawForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-                  // ✅ KYC check
+   const withdrawForm = document.getElementById('withdrawForm');
+  if (withdrawForm) {
+    withdrawForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const amt = Number(document.getElementById('withdrawAmount')?.value || 0);
+        if (!amt || amt <= 0) return alert('Enter valid amount');
+
+        // get user snapshot
+        const userRef = ref(db, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.exists() ? userSnapshot.val() : {};
+
+        // ✅ KYC check
         if (userData.kycStatus !== 'approved') {
           alert('Please do your KYC first.');
           return;
         }
 
-        try {
-          const amt = Number(document.getElementById('withdrawAmount')?.value || 0);
-          if (!amt || amt <= 0) return alert('Enter valid amount');
+        // check wallets
+        const wallets = userData.wallets || { 
+          mainWallet: userData.mainWallet, 
+          profitWallet: userData.profitWallet 
+        } || {};
+        const profitBal = Number(wallets.profitWallet || 0);
 
-          const userSnapshot = await get(ref(db, `users/${user.uid}`));
-          const userData = userSnapshot.exists() ? userSnapshot.val() : {};
-          const wallets = userData.wallets || { mainWallet: userData.mainWallet, profitWallet: userData.profitWallet } || {};
-          const profitBal = Number(wallets.profitWallet || 0);
+        // withdrawal rules
+        const MIN_WITHDRAW = 10000; // change to 2000 if that's your real min
+        if (amt < MIN_WITHDRAW) return alert(`Minimum withdraw amount is $${MIN_WITHDRAW}`);
+        if (profitBal < amt) return alert('Insufficient profit wallet balance');
 
-          // your rule: check min withdraw or max — adjust here:
-          const MIN_WITHDRAW = 10000; // if your rule is min 2000
-          if (amt < MIN_WITHDRAW) return alert(`Minimum withdraw amount is $${MIN_WITHDRAW}`);
-          if (profitBal < amt) return alert('Insufficient profit wallet balance');
+        // deduct immediately + update user data
+        const updates = {};
+        updates[`users/${user.uid}/wallets/profitWallet`] = profitBal - amt;
+        updates[`users/${user.uid}/totalTransactions`] = (Number(userData.totalTransactions || 0) + 1);
+        await update(ref(db), updates);
 
-          // deduct immediately and create withdrawal record (pending)
-          const updates = {};
-          updates[`users/${user.uid}/wallets/profitWallet`] = (profitBal - amt);
-          updates[`users/${user.uid}/totalTransactions`] = (Number(userData.totalTransactions||0) + 1);
-          await update(ref(db), updates);
+        // add withdrawal record (pending)
+        const wRef = push(ref(db, `users/${user.uid}/withdrawals`));
+        await set(wRef, { 
+          id: wRef.key, 
+          amount: amt, 
+          createdAt: serverTimestamp(), 
+          status: 'requested' 
+        });
 
-          const wRef = push(ref(db, `users/${user.uid}/withdrawals`));
-          await set(wRef, { id: wRef.key, amount: amt, createdAt: serverTimestamp(), status: 'requested' });
+        // add transaction log
+        const txRef = push(ref(db, `users/${user.uid}/transactions`));
+        await set(txRef, { 
+          id: txRef.key, 
+          type: 'withdrawal', 
+          amount: amt, 
+          wallet: 'profit', 
+          note: 'User withdrawal request', 
+          createdAt: serverTimestamp() 
+        });
 
-          const txRef = push(ref(db, `users/${user.uid}/transactions`));
-          await set(txRef, { id: txRef.key, type: 'withdrawal', amount: amt, wallet: 'profit', note: 'User withdrawal request', createdAt: serverTimestamp() });
-
-          alert('Withdrawal requested');
-        } catch (err) {
-          console.error('Withdraw error', err);
-          alert('Withdraw failed: ' + (err.message || 'unknown'));
-        }
-      });
-    } else {
-      console.warn('Withdraw form not found, skipping attachment');
-    }
+        alert('Withdrawal requested and pending admin approval.');
+      } catch (err) {
+        console.error('Withdraw error', err);
+        alert('Withdraw failed: ' + (err.message || 'unknown'));
+      }
+    });
+  } else {
+    console.warn('Withdraw form not found, skipping attachment');
+  }
   });
 });
   </script>
@@ -867,6 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </strong><a id="scrollUp" href="file:///C:/Users/DELL/Documents/Digitalaffiliate-main/Digitalaffiliate-main/withdraw.html#top" style="display: none; position: fixed; z-index: 2147483647;"><i class="fa-solid fa-caret-up"></i></a></body></html>
+
 
 
 
