@@ -449,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI('userGender', profile.gender || '');
         updateUI('userCountry', profile.country || '');
         updateUI('userDOB', profile.dob || '');
+        updateUI('userAddress', profile.address||'');
         // createdAt might be serverTimestamp; try to format
         const createdVal = profile.createdAt || profile.created_at || profile.created || '';
         updateUI('userCreated', createdVal ? (typeof createdVal === 'number' ? new Date(createdVal).toLocaleString() : createdVal) : '');
@@ -702,5 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body></html>
+
 
 
