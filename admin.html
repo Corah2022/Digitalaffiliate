@@ -220,12 +220,6 @@
         </form>
       </div>
 
-            <div class="card">
-        <h2>KYC Management</h2>
-        <p>Status: <span id="kycStatus">Not submitted</span></p>
-        <button id="approveKYC">Approve</button>
-        <button id="rejectKYC">Reject</button>
-      </div>
 
       <div class="card">
         <h2>Send Notification</h2>
@@ -261,6 +255,9 @@
       </table>
     </div>
   </div>
+
+  <div class="card">
+  <iframe width="100%" height="523px" src="ad.html" frameborder="0"></iframe></div>
 
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -391,18 +388,6 @@ async function loadUserData() {
     });
   }
 }
-
-    // Approve / Reject KYC
-  document.getElementById("approveKYC").addEventListener("click", async () => {
-    await update(ref(db, "users/" + currentUserId), { kycStatus: "approved" });
-    alert("KYC Approved");
-    loadUserData();
-  });
-  document.getElementById("rejectKYC").addEventListener("click", async () => {
-    await update(ref(db, "users/" + currentUserId), { kycStatus: "rejected" });
-    alert("KYC Rejected");
-    loadUserData();
-  });
 
          
 /* ---------------- UPDATE PROFILE ---------------- */
