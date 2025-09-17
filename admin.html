@@ -220,7 +220,7 @@
         </form>
       </div>
 
-            <div class="card">
+      <div class="card">
         <h2>KYC Management</h2>
         <p>Status: <span id="kycStatus">Not submitted</span></p>
         <button id="approveKYC">Approve</button>
@@ -337,6 +337,14 @@
     document.getElementById("address").value = p.address || "";
     document.getElementById("mainWallet").value = data.wallets?.mainWallet || 0;
     document.getElementById("profitWallet").value = data.wallets?.profitWallet || 0;
+
+    // ✅ KYC STATUS FIX
+    const kycStatusEl = document.getElementById("kycStatus");
+    if (data.kycStatus) {
+      kycStatusEl.textContent = data.kycStatus;
+    } else {
+      kycStatusEl.textContent = "Not submitted";
+    }
 
     // Transactions
     const txTable = document.querySelector("#txTable tbody");
@@ -459,70 +467,73 @@
     loadUserData();
   });
 
-  /* ---------------- SEND NOTIFICATION ---------------- */
+  /* ---------------- NOTIFICATIONS ---------------- */
   document.getElementById("notifyForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!currentUserId) return;
     const title = document.getElementById("notifyTitle").value;
     const body = document.getElementById("notifyBody").value;
-    const nRef = push(ref(db, "users/" + currentUserId + "/notifications"));
-    await set(nRef, { id: nRef.key, title, body, createdAt: Date.now(), read: false });
+    const noteRef = push(ref(db, "users/" + currentUserId + "/notifications"));
+    await set(noteRef, { id: noteRef.key, title, body, createdAt: Date.now() });
     alert("Notification sent");
     loadUserData();
   });
 
-  /* ---------------- DELETE + EDIT ---------------- */
-  document.body.addEventListener("click", async (e) => {
-    // Delete
-    if (e.target.dataset.delTx) {
-      await remove(ref(db, `users/${currentUserId}/transactions/${e.target.dataset.delTx}`));
-      loadUserData();
-    }
-    if (e.target.dataset.delInv) {
-      await remove(ref(db, `users/${currentUserId}/investments/${e.target.dataset.delInv}`));
-      loadUserData();
-    }
-    if (e.target.dataset.delNote) {
-      await remove(ref(db, `users/${currentUserId}/notifications/${e.target.dataset.delNote}`));
-      loadUserData();
-    }
-
-    // Save edits
+  /* ---------------- TABLE EVENTS ---------------- */
+  document.addEventListener("click", async (e) => {
+    // Transactions
     if (e.target.dataset.saveTx) {
       const id = e.target.dataset.saveTx;
-      const type = document.querySelector(`[data-edit-tx-type="${id}"]`).innerText;
-      const amt = Number(document.querySelector(`[data-edit-tx-amt="${id}"]`).innerText);
+      const type = document.querySelector(`[data-edit-tx-type='${id}']`).textContent;
+      const amt = Number(document.querySelector(`[data-edit-tx-amt='${id}']`).textContent);
       await update(ref(db, `users/${currentUserId}/transactions/${id}`), { type, amount: amt });
-      alert("Transaction updated");
+      alert("Transaction saved");
     }
+    if (e.target.dataset.delTx) {
+      const id = e.target.dataset.delTx;
+      await remove(ref(db, `users/${currentUserId}/transactions/${id}`));
+      alert("Transaction deleted");
+      loadUserData();
+    }
+
+    // Investments
     if (e.target.dataset.saveInv) {
       const id = e.target.dataset.saveInv;
-      const plan = document.querySelector(`[data-edit-inv-plan="${id}"]`).innerText;
-      const amt = Number(document.querySelector(`[data-edit-inv-amt="${id}"]`).innerText);
-      const statusText = document.querySelector(`[data-edit-inv-status="${id}"]`).innerText;
-      const finished = statusText.toLowerCase().includes("finish");
-      await update(ref(db, `users/${currentUserId}/investments/${id}`), { plan, amount: amt, finished });
-      alert("Investment updated");
+      const plan = document.querySelector(`[data-edit-inv-plan='${id}']`).textContent;
+      const amt = Number(document.querySelector(`[data-edit-inv-amt='${id}']`).textContent);
+      const status = document.querySelector(`[data-edit-inv-status='${id}']`).textContent === "Finished";
+      await update(ref(db, `users/${currentUserId}/investments/${id}`), { plan, amount: amt, finished: status });
+      alert("Investment saved");
     }
+    if (e.target.dataset.delInv) {
+      const id = e.target.dataset.delInv;
+      await remove(ref(db, `users/${currentUserId}/investments/${id}`));
+      alert("Investment deleted");
+      loadUserData();
+    }
+
+    // Notifications
     if (e.target.dataset.saveNote) {
       const id = e.target.dataset.saveNote;
-      const title = document.querySelector(`[data-edit-note-title="${id}"]`).innerText;
-      const body = document.querySelector(`[data-edit-note-body="${id}"]`).innerText;
+      const title = document.querySelector(`[data-edit-note-title='${id}']`).textContent;
+      const body = document.querySelector(`[data-edit-note-body='${id}']`).textContent;
       await update(ref(db, `users/${currentUserId}/notifications/${id}`), { title, body });
-      alert("Notification updated");
+      alert("Notification saved");
+    }
+    if (e.target.dataset.delNote) {
+      const id = e.target.dataset.delNote;
+      await remove(ref(db, `users/${currentUserId}/notifications/${id}`));
+      alert("Notification deleted");
+      loadUserData();
     }
   });
 
-  /* ---------------- AUTH CHECK ---------------- */
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      alert("Not logged in");
-      window.location.href = "login.html";
-    } else {
-      loadUsers();
-    }
+  /* ---------------- INIT ---------------- */
+  loadUsers();
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    document.getElementById("adminWrap").style.display = "none";
+    document.getElementById("loginModal").style.display = "flex";
   });
 </script>
-
 </body>
 </html>
