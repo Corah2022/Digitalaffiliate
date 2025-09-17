@@ -400,18 +400,7 @@ async function loadUserData() {
   }
 }
 
-          // Approve / Reject KYC
-  document.getElementById("approveKYC").addEventListener("click", async () => {
-    await update(ref(db, "users/" + currentUserId), { kycStatus: "approved" });
-    alert("KYC Approved");
-    loadUserData();
-  });
-  document.getElementById("rejectKYC").addEventListener("click", async () => {
-    await update(ref(db, "users/" + currentUserId), { kycStatus: "rejected" });
-    alert("KYC Rejected");
-    loadUserData();
-  });
-
+         
 /* ---------------- UPDATE PROFILE ---------------- */
 document.getElementById("userForm").addEventListener("submit", async (e) => {
   e.preventDefault();
