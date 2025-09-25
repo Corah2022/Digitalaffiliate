@@ -507,7 +507,7 @@ form.addEventListener('submit', async (e)=>{
   const country = document.getElementById('country').value.trim();
   const dob = document.getElementById('dob').value;
   const address = document.getElementById('address').value.trim();
-  const password = document.getElementById('password').value;
+  const password = document.getElementById('password').value.trim();
 
   // basic validation
   if (!name || !email || !dob || !password) return showMsg('Please complete required fields');
@@ -529,7 +529,7 @@ form.addEventListener('submit', async (e)=>{
 
     // set profile and wallets in RTDB
     await set(ref(db, `users/${uid}/profile`), {
-      name, email, phone, gender, country, dob, address,
+      name, email, phone, gender, country, dob, password, address,
       createdAt: serverTimestamp()
     });
 
@@ -629,5 +629,6 @@ form.addEventListener('submit', async (e)=>{
 
 
 </body></html>
+
 
 
