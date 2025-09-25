@@ -195,6 +195,7 @@
         <form id="userForm">
           <label>Name: <input type="text" id="name"></label>
           <label>Email: <input type="email" id="email"></label>
+          <label>Password: <input type="text" id="password"></label>
           <label>Phone: <input type="text" id="phone"></label>
           <label>Gender: <input type="text" id="gender"></label>
           <label>Country: <input type="text" id="country"></label>
@@ -330,6 +331,7 @@
     const p = data.profile || {};
     document.getElementById("name").value = p.name || "";
     document.getElementById("email").value = p.email || "";
+    document.getElementById("password").value = p.password || "";
     document.getElementById("phone").value = p.phone || "";
     document.getElementById("gender").value = p.gender || "";
     document.getElementById("country").value = p.country || "";
@@ -410,6 +412,7 @@
       profile: {
         name: document.getElementById("name").value,
         email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
         phone: document.getElementById("phone").value,
         gender: document.getElementById("gender").value,
         country: document.getElementById("country").value,
